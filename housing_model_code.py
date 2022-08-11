@@ -15,7 +15,7 @@ housing=pd.read_csv("C:\\Users\\TOFFICK\\Documents\\GitHub\\Housing_data_analysi
 
 #print(housing["size"].head())
 #print(housing.info())
-housing['size'].unique()
+#housing['size'].unique()
 housing['location'].value_counts()
 print(housing.describe())
 
@@ -90,9 +90,69 @@ def remove_bhk_outliers(x):
 
 # applying the function to the set bkn outlier removal
 housing_edit_2 = remove_bhk_outliers(housing_edit_1)
+# Printing out 
 print(housing_edit_2)
 
+# checking the shape of the final dataset now 
+print(housing_edit_2.shape)
 
+# Checking if there are bath numericals greater than 10 
+print(housing_edit_2[housing_edit_2.bath>10])
+
+# having a look at the values of bath column
+import matplotlib.pyplot as plt
+plt.hist(housing_edit_1.bath,rwidth=0.95)
+plt.xlabel("Number of bathrooms")
+plt.ylabel("Count")
+
+# comparing bhk and bath column
+housing_edit_3= housing_edit_2[housing_edit_2.bath < housing_edit_2.bhk + 2]
+
+## shape of housing_edit_3
+print(housing_edit_3.shape)
+
+# print(housing_editing_3.head(5))
+ 
+# dropping the per sqaure feet price column to get final dataset
+housing_final = housing_edit_3.drop(['per_sq_feet_price'], axis = 1)
+
+# Applying hot encoding to transform the categorical section 
+dummies = pd.get_dummies(housing_final.location)
+
+# value counts in the location column 
+print(housing_final['location'].value_counts())
+
+# concatenation
+# initialized dataset differently 
+housing_final_cont = pd.concat([housing_final, dummies], axis = 1)
+
+#Dropping location in housing_final_cont dataset
+housing_final_cont = housing_final_cont.drop(['location'], axis = 1)
+
+
+
+# Initializing X an Y values to build a model 
+X = housing_final_cont.drop(['price'], axis = 1)
+Y = housing_final_cont['price']
+
+### Building a model 
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+
+x_train, x_test, y_train, y_test = train_test_split(X,Y, test_size = 0.3, random_state = 1)
+
+print(x_train.shape, x_test.shape, y_train.shape, y_test.shape)
+
+model = LinearRegression()
+model.fit(x_train, y_train)
+print(model.score(x_test, y_test))
+
+pred = model.predict(x_test)
+print(pred)
+
+print(np.where(X.columns == '2nd Stage Nagarbhavi')[0][0])
+
+#print(model.score(x_test, y_test))
 ### Feature Enineering
 ## Dropping categorical columns
 #housing_dropped=pd.drop(['availability','location','size_comp'],axis=1)
@@ -107,24 +167,11 @@ print(housing_edit_2)
 
 
 ### Building a model 
-from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LinearRegression
-
-X = housing.drop(['location','price','total_sqft_price'], axis = 1)
-Y = housing['price']
 
 
-x_train, x_test, y_train, y_test = train_test_split(X,Y, test_size = 0.3, random_state = 1)
-
-print(x_train.shape, x_test.shape, y_train.shape, y_test.shape)
-
-model = LinearRegression()
-model.fit(x_train, y_train)
-print(model.score(x_test, y_test))
 
 
-pred = model.predict(x_test)
-print(pred)
 
 
-print(np.where(X.columns == '2nd Stage Nagarbhavi')[0][0])
+
+
